@@ -1,22 +1,27 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+from django.urls import reverse
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255 ,db_index=True)
     slug = models.SlugField(max_length=255, unique=True)
     
     class Meta:
-        #Specify categories type as meta data
+        # Specify categories type as meta data
         verbose_name_plural = 'Categories'
 
-    #Return the string name for category when called
+    def get_absolute_url(self):
+        return reverse('store:category_list', args=[self.slug])
+
+    # Return the string name for category when called
     def __str__(self):
         return self.name
 
 class Product(models.Model):
-    #Link product to category using foreign key, on_delete define rules for when category is deleted
+    # Link product to category using foreign key, on_delete define rules for when category is deleted
     category = models.ForeignKey(Category, related_name='product', on_delete=models.CASCADE)
-    #Link product to user
+    # Link product to user
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_creator')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -30,8 +35,11 @@ class Product(models.Model):
     
     class Meta:
         verbose_name_plural = 'Products'
-        #Change the ordering -created = descending order
+        # Change the ordering -created = descending order
         ordering = ('-created',)
+
+    def get_absolute_url(self):
+        return reverse('store:product_detail', args=[self.slug])
     
     def __str__(self):
         return self.title
